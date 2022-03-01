@@ -66,7 +66,8 @@ def get_AR(data, ar_data): #data_AR should be the full table with bairros and AR
     data = data.drop(columns=['best_match_score', '__id_left', '__id_right', 'Neighborhood']) # Removing useless columns
     data.rename(columns={'Bairro': 'Neighborhood'}, inplace=True)
     data = pd.merge(data,ar_data,left_on='Neighborhood', right_on='Bairro',how='left').drop(columns=["Regiao","IDS","Bairro",'N¼']) # Aggreagting the right AR names to our new bairros
-    data = data.dropna(subset='R.A') # Removing lines with no bairros/AR information
+    data.rename(columns={'R.A': 'RA'}, inplace=True)
+    data = data.dropna(subset='RA') # Removing lines with no bairros/AR information
 
     return data
 

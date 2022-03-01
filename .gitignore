@@ -1,2 +1,9 @@
 *.csv
 /raw_data
+*.shp
+*.cpg
+*.dbf
+*.geojson
+*.prf
+*.xml
+*.shx

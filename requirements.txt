@@ -1,1 +1,4 @@
 fuzzywuzzy
+unidecode
+geopandas
+fuzzymatcher

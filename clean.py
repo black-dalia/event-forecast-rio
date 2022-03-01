@@ -1,0 +1,79 @@
+# Import section
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import unidecode
+import fuzzymatcher
+
+# Data loading
+data1 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
+data2 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
+data3 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
+data4 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
+kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
+eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
+
+# Import data with correct bairros and AR names
+bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
+
+
+# Cleaning function
+def merge_clean(data1, data2, data3, data4):
+
+    # Merging
+    data = pd.concat([data1, data2, data3, data4]) # Merging all datasets
+
+    # Focusing on Rio de Janeiro only
+    data = data[data['municipio_fato'] == 'Rio de Janeiro (Capital)'] # Filtering on Rio de Janeiro only
+
+    # Columns transforming
+    data = data[kept_columns] # Removing useless columns
+    data.columns = eng_columns  # Renaming columns in English
+
+    # Date and Time preprocessing
+    data = data[data['Time'] != '99'] # Removing invalid time format
+    data['Date_Time'] = pd.to_datetime(data['Date'] + ' '
+                                      + data['Time'], format='%Y-%m-%d %H:%M') # Passing to datetime format
+    data.drop(columns=['Date', 'Time'], inplace=True) # Removing time and date columns once the Date_Time is created
+    data = data[data['Date_Time'] > '2008-01-31'] # Removing irrelevant date samples
+
+    # Missing values, duplicates & text standardizing
+    data = data.drop_duplicates(subset="Crime_ID") # Removing duplicates
+    data['Neighborhood'] = data['Neighborhood'].map(lambda x: unidecode.unidecode(x)) # Removing accents
+    data = data[data['Neighborhood'] != 'sem informacao'] # Removing missing values for neighborhood
+
+    return data
+
+# Bairra detail
+def barra_replace(row):
+    if row == "Barra":
+        row= "Barra da Tijuca"
+    return row
+
+# Bairros/AR matching
+def get_AR(data, ar_data): #data_AR should be the full table with bairros and AR
+
+    data['Neighborhood'] = data['Neighborhood'].map(barra_replace) # Setting the good "Barra da Tijuca" name
+
+    # Bairros matching
+    bairros = pd.DataFrame(ar_data, columns=["Bairro"]) # Creating a table with only the bairros
+    bairros.set_index("Bairro")
+    data = fuzzymatcher.fuzzy_left_join(data, bairros, left_on="Neighborhood", right_on="Bairro") # Replacing non-standardized bairros names with standardized ones
+    data = data.drop(columns=['best_match_score', '__id_left', '__id_right', 'Neighborhood']) # Removing useless columns
+    data.rename(columns={'Bairro': 'Neighborhood'}, inplace=True)
+    data = pd.merge(data,ar_data,left_on='Neighborhood', right_on='Bairro',how='left').drop(columns=["Regiao","IDS","Bairro",'N¼']) # Aggreagting the right AR names to our new bairros
+    data = data.dropna(subset='R.A') # Removing lines with no bairros/AR information
+
+    return data
+
+# Preprocessing - all
+def preproc(data1, data2, data3, data4, ar_data):
+    data = merge_clean(data1, data2, data3, data4)
+    #data = get_AR(data, ar_data)
+
+    return data
+
+if __name__ == "__main__":
+    data = preproc(data1, data2, data3, data4, bairros_all)
+    print(data.head(5))

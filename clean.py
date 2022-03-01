@@ -16,9 +16,10 @@ def get_data():
     eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
     return data1, data2, data3, data4, kept_columns, eng_columns
 
-
 # Import data with correct bairros and AR names
-bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
+def get_bairros_data():
+    bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
+    return bairros_all
 
 
 # Cleaning function
@@ -71,14 +72,14 @@ def get_AR(data, ar_data): #data_AR should be the full table with bairros and AR
 
     return data
 
-# Preprocessing - all
-def preproc(data1, data2, data3, data4, ar_data):
+# Cleaning - all
+def clean_all(data1, data2, data3, data4, ar_data):
     data = merge_clean(data1, data2, data3, data4)
-    #data = get_AR(data, ar_data)
+    data = get_AR(data, ar_data)
 
     return data
 
 if __name__ == "__main__":
     data1, data2, data3, data4, kept_columns, eng_columns = get_data()
-    data = preproc(data1, data2, data3, data4, bairros_all)
+    data = clean_all(data1, data2, data3, data4, get_bairros_data())
     print(data.head(5))

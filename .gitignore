@@ -7,3 +7,9 @@
 *.prf
 *.xml
 *.shx
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+.DS_Store

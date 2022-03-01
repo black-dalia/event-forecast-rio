@@ -7,12 +7,15 @@ import unidecode
 import fuzzymatcher
 
 # Data loading
-data1 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
-data2 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
-data3 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
-data4 = pd.read_csv('/Users/thomaskremer/code/black-dalia/event-forecast-rio/raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
-kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
-eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
+def get_data():
+    data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
+    data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
+    data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
+    data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
+    kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
+    eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
+    return data1, data2, data3, data4, kept_columns, eng_columns
+
 
 # Import data with correct bairros and AR names
 bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
@@ -75,5 +78,6 @@ def preproc(data1, data2, data3, data4, ar_data):
     return data
 
 if __name__ == "__main__":
+    data1, data2, data3, data4, kept_columns, eng_columns = get_data()
     data = preproc(data1, data2, data3, data4, bairros_all)
     print(data.head(5))

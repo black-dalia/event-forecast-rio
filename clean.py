@@ -7,15 +7,28 @@ import unidecode
 import fuzzymatcher
 
 # Data loading
+<<<<<<< HEAD
 data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
 data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
 data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
 data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
 kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
 eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
+=======
+def get_data():
+    data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
+    data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
+    data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
+    data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
+    kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
+    eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
+    return data1, data2, data3, data4, kept_columns, eng_columns
+>>>>>>> 3b98357af5114863f5d7c5251026e4f687399bf2
 
 # Import data with correct bairros and AR names
-bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
+def get_bairros_data():
+    bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding='iso-8859-1')
+    return bairros_all
 
 
 # Cleaning function
@@ -58,22 +71,24 @@ def get_AR(data, ar_data): #data_AR should be the full table with bairros and AR
 
     # Bairros matching
     bairros = pd.DataFrame(ar_data, columns=["Bairro"]) # Creating a table with only the bairros
-    bairros.set_index("Bairro")
+    # bairros.set_index("Bairro")
     data = fuzzymatcher.fuzzy_left_join(data, bairros, left_on="Neighborhood", right_on="Bairro") # Replacing non-standardized bairros names with standardized ones
     data = data.drop(columns=['best_match_score', '__id_left', '__id_right', 'Neighborhood']) # Removing useless columns
     data.rename(columns={'Bairro': 'Neighborhood'}, inplace=True)
     data = pd.merge(data,ar_data,left_on='Neighborhood', right_on='Bairro',how='left').drop(columns=["Regiao","IDS","Bairro",'N¼']) # Aggreagting the right AR names to our new bairros
-    data = data.dropna(subset='R.A') # Removing lines with no bairros/AR information
+    data.rename(columns={'R.A': 'RA'}, inplace=True)
+    data = data.dropna(subset=['RA']) # Removing lines with no bairros/AR information
 
     return data
 
-# Preprocessing - all
-def preproc(data1, data2, data3, data4, ar_data):
+# Cleaning - all
+def clean_all(data1, data2, data3, data4, ar_data):
     data = merge_clean(data1, data2, data3, data4)
-    #data = get_AR(data, ar_data)
+    data = get_AR(data, ar_data)
 
     return data
 
 if __name__ == "__main__":
-    data = preproc(data1, data2, data3, data4, bairros_all)
+    data1, data2, data3, data4, kept_columns, eng_columns = get_data()
+    data = clean_all(data1, data2, data3, data4, get_bairros_data())
     print(data.head(5))

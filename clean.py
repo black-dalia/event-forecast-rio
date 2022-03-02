@@ -21,7 +21,7 @@ def get_bairros_data():
     bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding="iso-8859-1")
     return bairros_all
 # Cleaning function
-def merge_clean(data1, data2, data3, data4):
+def merge_clean_debug(data1, data2, data3, data4):
     # Merging
     data = pd.concat([data1, data2, data3, data4]) # Merging all datasets
     # Focusing on Rio de Janeiro only
@@ -33,13 +33,17 @@ def merge_clean(data1, data2, data3, data4):
         "Police_station", "Date", "Time", "Place_type", "Neighborhood"]  # Renaming columns in English
     # Date and Time preprocessing
     data = data[data["Time"] != "99"] # Removing invalid time format
-    data = data.dropna(subset = ['Date']) # Removing missing values (for date)
-    data["Test_Date_Time"] = data["Date"] + " " + data["Time"] # Combining Date and Time
-    data["Date_Time"] = pd.to_datetime(data["Test_Date_Time"]) # Passing to DateTime format
+
+    # Part added to debugging - only one part of the issue
+    data = data.dropna(subset = ['Date'])
+
+    data["Test_Date_Time"] = data["Date"] + " " + data["Time"]
+    data["Date_Time"] = pd.to_datetime(data["Test_Date_Time"])
+
     data.drop(columns=["Date", "Time"], inplace=True) # Removing time and date columns once the Date_Time is created
-    data = data[data["Date_Time"] > "2009-01-01"] # Removing irrelevant date samples
-    # Missing values, duplicates & text standardizing
-    data = data.drop_duplicates(subset="Crime_ID") # Removing duplicates
+    data = data[data["Date_Time"] > "2008-12-31"] # Removing irrelevant date samples
+
+    data = data.drop_duplicates(subset="Crime_ID")
     data["Neighborhood"] = data["Neighborhood"].map(lambda x: unidecode.unidecode(x)) # Removing accents
     data = data[data["Neighborhood"] != "sem informacao"] # Removing missing values for neighborhood
     return data

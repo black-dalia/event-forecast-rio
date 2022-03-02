@@ -7,23 +7,14 @@ import unidecode
 import fuzzymatcher
 from datetime import datetime
 
-# Data loading
-data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
-data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
-data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
-data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
-kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
-eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
-
 def get_data():
 
     data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
     data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
     data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
     data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
-    kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
-    eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
-    return data1, data2, data3, data4, kept_columns, eng_columns
+
+    return data1, data2, data3, data4
 
 # Import data with correct bairros and AR names
 def get_bairros_data():

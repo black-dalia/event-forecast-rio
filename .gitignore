@@ -8,3 +8,4 @@
 *.xml
 *.shx
 *.pyc
+__pycache__

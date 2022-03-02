@@ -21,7 +21,7 @@ def get_bairros_data():
     bairros_all = pd.read_csv("raw_data/bairros_lista.csv", encoding="iso-8859-1")
     return bairros_all
 # Cleaning function
-def merge_clean_debug(data1, data2, data3, data4):
+def merge_clean(data1, data2, data3, data4):
     # Merging
     data = pd.concat([data1, data2, data3, data4]) # Merging all datasets
     # Focusing on Rio de Janeiro only

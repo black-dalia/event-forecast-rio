@@ -1,4 +1,8 @@
-fuzzywuzzy
 unidecode
 geopandas
 fuzzymatcher
+# Import section
+pandas
+numpy
+matplotlib.pyplot
+seaborn

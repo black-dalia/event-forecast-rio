@@ -27,6 +27,7 @@ def get_format(data):
     ## compute nb crimes / 1000 inhabitants
     data_merge["nb_crimes_1000"]=data_merge.nb_crimes / data_merge.Populacao*1000
     data_merge.drop(columns=["nb_crimes","Populacao","year_temp"], inplace=True)
+    data_merge.rename(columns={'nb_crimes_1000': 'nb_crimes'},inplace=True)
     data_merge.set_index(["AR","Date"],inplace=True)
     ##
     preprocessed_data = preprocessed_data.unstack(level=0)
@@ -75,6 +76,14 @@ def clean_pop_data():
     df = pd.concat(middle_dict).reset_index().drop(columns=["level_0", "level_1"])
 
     return df
+
+def extract_ts(df, AR):
+    '''Extract the time series from selected df and for each AR'''
+    df1 = df.reset_index()
+    df2 = df1[[(     'Date',                   ''), ('nb_crimes',AR)]]
+    df2.columns = df2.columns.droplevel()
+    df2.columns=["ds", "y"]
+    return df2
 
 if __name__ == "__main__":
     print("start time  =", datetime.now())

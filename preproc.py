@@ -33,7 +33,11 @@ def get_format(data):
     preprocessed_data = preprocessed_data.replace(np.nan, 0).astype(int)
     preprocessed_data_1000 = data_merge.unstack(level=0)
     preprocessed_data_1000 = preprocessed_data_1000.replace(np.nan, 0)
-    return preprocessed_data, preprocessed_data_1000
+
+    # Create a RNN-suited dataframe (lines = bairros, columns = dates)
+    RNN_data = preprocessed_data.transpose()
+
+    return preprocessed_data, preprocessed_data_1000, RNN_data
 
 def get_popfile():
     '''import population file'''
@@ -76,10 +80,11 @@ if __name__ == "__main__":
     print("start time  =", datetime.now())
     data1, data2, data3, data4 = get_data()
     data = clean_all(data1, data2, data3, data4, get_bairros_data())
-    preprocessed_data, preprocessed_data_1000 = get_format(data)
+    preprocessed_data, preprocessed_data_1000, RNN_data = get_format(data)
     pop_clean = clean_pop_data()
     print(pop_clean.head())
     print(preprocessed_data.tail(10))
     print(preprocessed_data_1000.tail(10))
+    print(RNN_data.head(5))
 
     print("end time  =", datetime.now())

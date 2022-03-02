@@ -33,8 +33,9 @@ def merge_clean(data1, data2, data3, data4):
         "Police_station", "Date", "Time", "Place_type", "Neighborhood"]  # Renaming columns in English
     # Date and Time preprocessing
     data = data[data["Time"] != "99"] # Removing invalid time format
-    data["Date_Time"] = pd.to_datetime(data["Date"] + ' '
-                                      + data["Time"], format="%Y-%m-%d %H:%M") # Passing to datetime format
+    data = data.dropna(subset = ['Date']) # Removing missing values (for date)
+    data["Test_Date_Time"] = data["Date"] + " " + data["Time"] # Combining Date and Time
+    data["Date_Time"] = pd.to_datetime(data["Test_Date_Time"]) # Passing to DateTime format
     data.drop(columns=["Date", "Time"], inplace=True) # Removing time and date columns once the Date_Time is created
     data = data[data["Date_Time"] > "2008-12-31"] # Removing irrelevant date samples
     # Missing values, duplicates & text standardizing

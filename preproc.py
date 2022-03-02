@@ -27,13 +27,18 @@ def get_format(data):
     ## compute nb crimes / 1000 inhabitants
     data_merge["nb_crimes_1000"]=data_merge.nb_crimes / data_merge.Populacao*1000
     data_merge.drop(columns=["nb_crimes","Populacao","year_temp"], inplace=True)
+    data_merge.rename(columns={'nb_crimes_1000': 'nb_crimes'},inplace=True)
     data_merge.set_index(["AR","Date"],inplace=True)
     ##
     preprocessed_data = preprocessed_data.unstack(level=0)
     preprocessed_data = preprocessed_data.replace(np.nan, 0).astype(int)
     preprocessed_data_1000 = data_merge.unstack(level=0)
     preprocessed_data_1000 = preprocessed_data_1000.replace(np.nan, 0)
-    return preprocessed_data, preprocessed_data_1000
+
+    # Create a RNN-suited dataframe (lines = bairros, columns = dates)
+    RNN_data = preprocessed_data.transpose()
+
+    return preprocessed_data, preprocessed_data_1000, RNN_data
 
 def get_popfile():
     '''import population file'''
@@ -72,14 +77,23 @@ def clean_pop_data():
 
     return df
 
+def extract_ts(df, AR):
+    '''Extract the time series from selected df and for each AR'''
+    df1 = df.reset_index()
+    df2 = df1[[(     'Date',                   ''), ('nb_crimes',AR)]]
+    df2.columns = df2.columns.droplevel()
+    df2.columns=["ds", "y"]
+    return df2
+
 if __name__ == "__main__":
     print("start time  =", datetime.now())
     data1, data2, data3, data4 = get_data()
     data = clean_all(data1, data2, data3, data4, get_bairros_data())
-    preprocessed_data, preprocessed_data_1000 = get_format(data)
+    preprocessed_data, preprocessed_data_1000, RNN_data = get_format(data)
     pop_clean = clean_pop_data()
     print(pop_clean.head())
     print(preprocessed_data.tail(10))
     print(preprocessed_data_1000.tail(10))
+    print(RNN_data.head(5))
 
     print("end time  =", datetime.now())

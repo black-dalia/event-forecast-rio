@@ -7,23 +7,14 @@ import unidecode
 import fuzzymatcher
 from datetime import datetime
 
-# Data loading
-data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
-data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
-data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
-data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
-kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
-eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
-
 def get_data():
 
     data1 = pd.read_csv('raw_data/parte1.csv', sep=';', encoding = 'iso-8859-1')
     data2 = pd.read_csv('raw_data/parte2.csv', sep=';', encoding = 'iso-8859-1')
     data3 = pd.read_csv('raw_data/parte3.csv', sep=';', encoding = 'iso-8859-1')
     data4 = pd.read_csv('raw_data/parte4.csv', sep=';', encoding = 'iso-8859-1')
-    kept_columns = ['controle', 'titulo_do', 'total_rbft', 'cisp', 'data_fato', 'hora_fato', 'local', 'bairro_fato']
-    eng_columns = ['Crime_ID', 'Crime_sub_type', 'Crime_type', 'Police_station', 'Date', 'Time', 'Place_type', 'Neighborhood']
-    return data1, data2, data3, data4, kept_columns, eng_columns
+
+    return data1, data2, data3, data4
 
 # Import data with correct bairros and AR names
 def get_bairros_data():
@@ -42,10 +33,11 @@ def merge_clean(data1, data2, data3, data4):
         "Police_station", "Date", "Time", "Place_type", "Neighborhood"]  # Renaming columns in English
     # Date and Time preprocessing
     data = data[data["Time"] != "99"] # Removing invalid time format
-    data["Date_Time"] = pd.to_datetime(data["Date"] + ' '
-                                      + data["Time"], format="%Y-%m-%d %H:%M") # Passing to datetime format
+    data = data.dropna(subset = ['Date']) # Removing missing values (for date)
+    data["Test_Date_Time"] = data["Date"] + " " + data["Time"] # Combining Date and Time
+    data["Date_Time"] = pd.to_datetime(data["Test_Date_Time"]) # Passing to DateTime format
     data.drop(columns=["Date", "Time"], inplace=True) # Removing time and date columns once the Date_Time is created
-    data = data[data["Date_Time"] > "2008-12-31"] # Removing irrelevant date samples
+    data = data[data["Date_Time"] > "2009-01-01"] # Removing irrelevant date samples
     # Missing values, duplicates & text standardizing
     data = data.drop_duplicates(subset="Crime_ID") # Removing duplicates
     data["Neighborhood"] = data["Neighborhood"].map(lambda x: unidecode.unidecode(x)) # Removing accents

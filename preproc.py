@@ -79,6 +79,7 @@ def extract_ts(df, AR):
     df2 = df1[[(     'Date',                   ''), ('nb_crimes',AR)]]
     df2.columns = df2.columns.droplevel()
     df2.columns=["ds", "y"]
+    df2.ds = df2.ds.map(pd.to_datetime)
     return df2
 
 if __name__ == "__main__":

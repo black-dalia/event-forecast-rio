@@ -37,7 +37,7 @@ def merge_clean(data1, data2, data3, data4):
     data["Test_Date_Time"] = data["Date"] + " " + data["Time"] # Combining Date and Time
     data["Date_Time"] = pd.to_datetime(data["Test_Date_Time"]) # Passing to DateTime format
     data.drop(columns=["Date", "Time"], inplace=True) # Removing time and date columns once the Date_Time is created
-    data = data[data["Date_Time"] > "2008-12-31"] # Removing irrelevant date samples
+    data = data[data["Date_Time"] > "2009-01-01"] # Removing irrelevant date samples
     # Missing values, duplicates & text standardizing
     data = data.drop_duplicates(subset="Crime_ID") # Removing duplicates
     data["Neighborhood"] = data["Neighborhood"].map(lambda x: unidecode.unidecode(x)) # Removing accents

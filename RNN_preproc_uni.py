@@ -18,9 +18,10 @@ def subsample_sequence(df, length):
 def split_subsample_sequence(df, length):
     '''Create one single random (X,y) pair'''
     df_subsample = subsample_sequence(df, length)
-    y_sample = df_subsample.iloc[length -1]
+    pred_len = 31
+    y_sample = df_subsample.iloc[length-pred_len:]
 
-    X_sample = df_subsample[0:length -1]
+    X_sample = df_subsample[0:length-pred_len]
     X_sample = X_sample.values
     return np.array(X_sample), np.array(y_sample)
 

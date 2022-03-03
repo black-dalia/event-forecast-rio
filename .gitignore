@@ -1,3 +1,9 @@
 *.csv
 /raw_data
+
 *.pyc
+
+Untitled-checkpoint.ipynb
+/.ipynb_checkpoints
+/__pycache__
+

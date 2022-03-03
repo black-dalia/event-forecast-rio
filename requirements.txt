@@ -1,2 +1,4 @@
 fuzzywuzzy
 fbprophet
+pandas
+numpy

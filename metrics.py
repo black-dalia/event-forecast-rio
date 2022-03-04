@@ -50,9 +50,9 @@ def forecast_accuracy(forecast, actual):
             'corr':corr, 'minmax':minmax})
 
 # Note: Make sure to pass the region in quotation marks, such as "Mare" or "Anchieta"
-def get_baseline_metrics(region, df):
-    baseline_month_actual_region = get_baseline_actual(df).region
-    baseline_month_forecast_region = get_baseline_predictions(df).region
+def get_baseline_metrics(AR, df):
+    baseline_month_actual_region = get_baseline_actual(df)[AR]
+    baseline_month_forecast_region = get_baseline_predictions(df)[AR]
 
     baseline_metrics = forecast_accuracy(baseline_month_forecast_region, baseline_month_actual_region)
     return baseline_metrics

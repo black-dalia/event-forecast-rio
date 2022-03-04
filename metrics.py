@@ -8,9 +8,15 @@ import pandas as pd
 def get_baseline_data(path):
     # Preprocessing of baseline data
     df = pd.read_csv(path)
-    df.columns = df.iloc[0, :]
-    df = df.iloc[2:, :]
-    df["AR"] = pd.to_datetime(df.AR)
+    df.columns = ["Date", "Anchieta", "Bangu", "Barra da Tijuca", "Botafogo",
+       "Campo Grande", "Centro", "Cidade de Deus", "Complexo do Alemao",
+       "Copacabana", "Guaratiba", "Ilha do Governador", "Inhauma", "Iraja",
+       "Jacarepagua", "Jacarezinho", "Lagoa", "Madureira", "Mare", "Meier",
+       "Pavuna", "Portuaria", "Ramos", "Realengo", "Rio Comprido", "Rocinha",
+       "Santa Cruz", "Santa Teresa", "Sao Cristovao", "Tijuca", "Vila Isabel"]
+    df = df.iloc[2:-1]
+    df = df.reset_index().drop(columns="index")
+    df["Date"] = pd.to_datetime(df.Date)
     region_columns = list(df.columns)[1:]
     for column in region_columns:
         df[column] = pd.to_numeric(df[column])
@@ -20,11 +26,11 @@ def get_baseline_data(path):
 # This can then be passed to the forecast_accuracy function as "forecast".
 
 def get_baseline_actual(df):
-    baseline_month_actual = df[(df['AR'] >= "2019-01-01") & (df['AR'] < "2019-02-01")].reset_index().drop(columns="index")
+    baseline_month_actual = df[(df['Date'] >= "2019-01-01") & (df['Date'] < "2019-02-01")].reset_index().drop(columns="index")
     return baseline_month_actual
 
 def get_baseline_predictions(df):
-    baseline_data = df[(df['AR'] >= "2018-01-01") & (df['AR'] < "2019-01-01")]
+    baseline_data = df[(df['Date'] >= "2018-01-01") & (df['Date'] < "2019-01-01")]
     baseline_data = baseline_data.reset_index().drop(columns="index")
     baseline_mean = baseline_data.mean().to_frame().T
     baseline_month_forecast = pd.concat([baseline_mean]*31).reset_index().drop(columns="index")

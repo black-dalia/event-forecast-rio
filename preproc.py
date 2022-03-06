@@ -34,6 +34,8 @@ def get_format(data):
     preprocessed_data = preprocessed_data.replace(np.nan, 0).astype(int)
     preprocessed_data_1000 = data_merge.unstack(level=0)
     preprocessed_data_1000 = preprocessed_data_1000.replace(np.nan, 0)
+    preprocessed_data = preprocessed_data.droplevel(level=0,axis=1)
+    preprocessed_data_1000 = preprocessed_data_1000.droplevel(level=0,axis=1)
     return preprocessed_data, preprocessed_data_1000
 
 def get_popfile():
@@ -76,8 +78,8 @@ def clean_pop_data():
 def extract_ts(df, AR):
     '''Extract the time series from selected df and for each AR'''
     df1 = df.reset_index()
-    df2 = df1[[(     'Date',                   ''), ('nb_crimes',AR)]]
-    df2.columns = df2.columns.droplevel()
+    df2 = df1[['Date',AR]]
+    #df2.columns = df2.columns.droplevel()
     df2.columns=["ds", "y"]
     df2.ds = df2.ds.map(pd.to_datetime)
     return df2

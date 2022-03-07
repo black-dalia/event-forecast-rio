@@ -41,7 +41,12 @@ def get_X_y(df, n_sequences, length):
 
 def get_X_y_all_AR(df, n_sequences, length):
     '''Return a list of samples (X, y)'''
-    regions = list(df.columns.map(lambda x: x[1]))
+    regions = ['Anchieta','Bangu','Barra da Tijuca','Botafogo','Campo Grande','Centro',\
+           'Cidade de Deus','Complexo do Alemao','Copacabana','Guaratiba','Ilha do Governador',\
+           'Inhauma','Iraja','Jacarepagua','Jacarezinho','Lagoa','Madureira','Mare','Meier','Pavuna',\
+           'Portuaria','Ramos','Realengo','Rio Comprido','Rocinha','Santa Cruz','Santa Teresa','Sao Cristovao',\
+           'Tijuca','Vila Isabel']
+    #regions = list(df.columns.map(lambda x: x[1]))
     X_list=[]
     y_list=[]
     for region in regions:

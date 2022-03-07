@@ -78,3 +78,43 @@ def compute_plot_pred_multi(data,modelname,length, prediction_horizon):
     print(f"Baseline MSE (computed on test set):{error_baseline['mse']}")
 
     return y_pred_df
+
+def compute_pred_test(data,modelname,length, prediction_horizon):
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:]
+    pred = test_data.copy()
+    pred.iloc[:,1:] = None
+
+    for i in range(0,804-(length-prediction_horizon)-prediction_horizon,prediction_horizon):
+        pred_one = modelname.predict(test_data.iloc[i:i+(length-prediction_horizon),1:]\
+            .to_numpy().reshape(1,(length-prediction_horizon),30))[0]
+        #model.predict()
+        pred.iloc[i+(length-prediction_horizon):i+(length-prediction_horizon)\
+            +prediction_horizon,1:] = pred_one
+
+    return pred
+
+def plot_actual_pred_test(data,modelname, length, prediction_horizon):
+    regions = ['Anchieta','Bangu','Barra da Tijuca','Botafogo','Campo Grande','Centro',\
+           'Cidade de Deus','Complexo do Alemao','Copacabana','Guaratiba','Ilha do Governador',\
+           'Inhauma','Iraja','Jacarepagua','Jacarezinho','Lagoa','Madureira','Mare','Meier','Pavuna',\
+           'Portuaria','Ramos','Realengo','Rio Comprido','Rocinha','Santa Cruz','Santa Teresa','Sao Cristovao',\
+           'Tijuca','Vila Isabel']
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:]
+    baseline = get_baseline_predictions(data)
+    y_pred = compute_pred_test(data,modelname,length, prediction_horizon)
+    fig, ax = plt.subplots(30,1,figsize=(16,100))
+    for i,AR in enumerate(regions):
+            ax[i].plot(test_data.iloc[119:,0],test_data.iloc[119:,i+1], c= "blue", label='actual')
+            ax[i].plot(test_data.iloc[119:,0],y_pred.iloc[119:,i+1], c="red", label = "forecast")
+            ax[i].plot(test_data.iloc[119:,0], baseline.iloc[119:,i], c="green", linestyle='dashed', label = "baseline")
+            ax[i].title.set_text(AR)
+            ax[i].legend(loc="upper left")
+
+def error_actual_pred_baseline(data,y_pred):
+    '''compute mse on test data'''
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:]
+    baseline_test = get_baseline_predictions(data)[119:]
+    y_pred_test =y_pred[119:]

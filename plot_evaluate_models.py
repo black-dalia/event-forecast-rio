@@ -45,7 +45,7 @@ def compute_plot_pred_multi(data,modelname,length, prediction_horizon):
     data_test = data_wo_date[len_:]
     y_pred= []
     for i in range(int((804-(length-prediction_horizon))/prediction_horizon)+1):
-        data_test_temp = data_wo_date[i*prediction_horizon:i*prediction_horizon+(length-prediction_horizon)]
+        data_test_temp = data_test[i*prediction_horizon:i*prediction_horizon+(length-prediction_horizon)]
         data_test_temp = np.array(data_test_temp)
         data_test_temp = data_test_temp.reshape(1,(length-prediction_horizon),30)
         y_pred_temp = modelname.predict(data_test_temp).tolist()[0]

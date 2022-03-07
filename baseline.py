@@ -20,6 +20,15 @@ def get_baseline_predictions(df):
     baseline_month_forecast = pd.concat([baseline_mean]*804).reset_index().drop(columns="index")
     return baseline_month_forecast
 
+def get_baseline_predictions_1(df):
+    '''compute baseline model (mean) for the validation period'''
+    #df = df.droplevel(level=0,axis=1).reset_index()
+    baseline_data = df[(df['Date'] >= date(2016,10,19)) & (df['Date'] < date(2017,10,19))]
+    baseline_data = baseline_data.reset_index().drop(columns="index")
+    baseline_mean = baseline_data.mean().to_frame().T
+    baseline_month_forecast = pd.concat([baseline_mean]*804).reset_index().drop(columns="index")
+    return baseline_month_forecast
+
 def forecast_accuracy(actual, forecast):
 
     forecast = forecast.to_numpy()

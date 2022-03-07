@@ -1,6 +1,7 @@
 import math
 import pandas as pd
 import numpy as np
+import preproc
 
 
 def subsample_sequence(df, length):
@@ -38,8 +39,73 @@ def get_X_y(df, n_sequences, length):
     y = np.array(y)
     return X, y
 
-def get_train_test(df,n_sequences,length):
+def get_X_y_all_AR(df, n_sequences, length):
+    '''Return a list of samples (X, y)'''
+    regions = ['Anchieta','Bangu','Barra da Tijuca','Botafogo','Campo Grande','Centro',\
+           'Cidade de Deus','Complexo do Alemao','Copacabana','Guaratiba','Ilha do Governador',\
+           'Inhauma','Iraja','Jacarepagua','Jacarezinho','Lagoa','Madureira','Mare','Meier','Pavuna',\
+           'Portuaria','Ramos','Realengo','Rio Comprido','Rocinha','Santa Cruz','Santa Teresa','Sao Cristovao',\
+           'Tijuca','Vila Isabel']
+    #regions = list(df.columns.map(lambda x: x[1]))
+    X_list=[]
+    y_list=[]
+    for region in regions:
+        X, y = [], []
+        AR = preproc.extract_ts(df,region)["y"]
+        for i in range(n_sequences):
+            (xi, yi) = split_subsample_sequence(AR, length)
+            X.append(xi)
+            y.append(yi)
+
+        X = np.array(X)
+        y = np.array(y)
+        X_list.append(X)
+        y_list.append(y)
+
+    X_all = np.concatenate(X_list[:])
+    y_all = np.concatenate(y_list[:])
+
+    return X_all, y_all
+
+def get_train_test(data,n_sequences,length,region):
     '''Returns train and test data for X and y'''
+
+    if region == "all_AR":
+        df = data
+        len_ = int(0.8*df.shape[0])
+        df_train = df[:len_]
+        df_test = df[len_:]
+
+        test_seq = math.floor(n_sequences/4)
+
+        X_train, y_train = get_X_y_all_AR(df_train, n_sequences, length)
+        X_test, y_test = get_X_y_all_AR(df_test, test_seq, length)
+
+    else:
+        df = preproc.extract_ts(data,region)["y"]
+        len_ = int(0.8*df.shape[0])
+        df_train = df[:len_]
+        df_test = df[len_:]
+
+        test_seq = math.floor(n_sequences/4)
+
+        X_train, y_train = get_X_y(df_train, n_sequences, length)
+        X_test, y_test = get_X_y(df_test, test_seq, length)
+
+    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1],1)
+    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1],1)
+
+    return X_train, y_train, X_test, y_test
+
+#how to use
+#X_train, y_train, X_test, y_test = get_train_test(preproc_data_rate, 2000, 200, "Centro")
+#X_train, y_train, X_test, y_test = get_train_test(preproc_data_rate, 2000, 200, "all_AR")
+
+
+'''
+#old versions
+def get_train_test(df,n_sequences,length):
+    #Returns train and test data for X and y
     len_ = int(0.8*df.shape[0])
     df_train = df[:len_]
     df_test = df[len_:]
@@ -59,3 +125,4 @@ def get_train_test(df,n_sequences,length):
 
 #output
 #X_train, y_train, X_test, y_test = get_train_test(Centro_df, 200, 21)
+'''

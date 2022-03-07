@@ -113,8 +113,34 @@ def plot_actual_pred_test(data,modelname, length, prediction_horizon):
             ax[i].legend(loc="upper left")
 
 def error_actual_pred_baseline(data,y_pred,length, prediction_horizon):
-    '''compute mse on test data'''
+    '''compute mse on test period
+    y_pred can be computed with the function compute_pred_test'''
     len_ = int(0.8*data.shape[0])
     test_data = data[len_:][length-prediction_horizon:]
+    test_data = test_data.drop(columns="Date")
+    test_data.reset_index(inplace=True)
+
     baseline_test = get_baseline_predictions(data)[length-prediction_horizon:]
+    baseline_test.reset_index(inplace=True)
+    diff_baseline = test_data - baseline_test
+    diff_baseline_2 = diff_baseline**2
+    error_baseline = diff_baseline_2.mean()
+    error_baseline = pd.DataFrame(error_baseline)
+
     y_pred_test =y_pred[length-prediction_horizon:]
+    y_pred_test = y_pred_test.drop(columns="Date")
+    y_pred_test.reset_index(inplace=True)
+    diff_y_pred = test_data - y_pred_test
+    diff_y_pred_2 = diff_y_pred**2
+    error_y_pred = diff_y_pred_2.mean()
+    error_y_pred = pd.DataFrame(error_y_pred)
+
+    error=pd.DataFrame()
+    error["error_baseline"] = error_baseline
+    error["error_prediction"] = error_y_pred
+    error = error[1:]
+    error_mean = pd.DataFrame(error.mean()).T
+    error_tot = pd.concat([error, error_mean])
+    error_tot.index.values[-1] = "Rio Mean"
+
+    return error_tot

@@ -106,15 +106,15 @@ def plot_actual_pred_test(data,modelname, length, prediction_horizon):
     y_pred = compute_pred_test(data,modelname,length, prediction_horizon)
     fig, ax = plt.subplots(30,1,figsize=(16,100))
     for i,AR in enumerate(regions):
-            ax[i].plot(test_data.iloc[119:,0],test_data.iloc[119:,i+1], c= "blue", label='actual')
-            ax[i].plot(test_data.iloc[119:,0],y_pred.iloc[119:,i+1], c="red", label = "forecast")
-            ax[i].plot(test_data.iloc[119:,0], baseline.iloc[119:,i], c="green", linestyle='dashed', label = "baseline")
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0],test_data.iloc[length-prediction_horizon:,i+1], c= "blue", label='actual')
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0],y_pred.iloc[length-prediction_horizon:,i+1], c="red", label = "forecast")
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0], baseline.iloc[length-prediction_horizon:,i], c="green", linestyle='dashed', label = "baseline")
             ax[i].title.set_text(AR)
             ax[i].legend(loc="upper left")
 
-def error_actual_pred_baseline(data,y_pred):
+def error_actual_pred_baseline(data,y_pred,length, prediction_horizon):
     '''compute mse on test data'''
     len_ = int(0.8*data.shape[0])
-    test_data = data[len_:]
-    baseline_test = get_baseline_predictions(data)[119:]
-    y_pred_test =y_pred[119:]
+    test_data = data[len_:][length-prediction_horizon:]
+    baseline_test = get_baseline_predictions(data)[length-prediction_horizon:]
+    y_pred_test =y_pred[length-prediction_horizon:]

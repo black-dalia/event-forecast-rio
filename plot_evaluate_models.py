@@ -37,44 +37,113 @@ def compute_plot_pred(data,modelname,AR, nseq, length):
     print(f"performances computed on test set:{res}")
     return y_pred
 
-def compute_plot_pred_multi(data,modelname,length, prediction_horizon):
-    ''' for many to many model'''
-    '''compute and plot prediction over test time period and overlay with actual data'''
-    data_wo_date = data.drop(columns="Date")
-    len_ = int(0.8*data_wo_date.shape[0])
-    data_test = data_wo_date[len_:]
-    y_pred= []
-    for i in range(int((804-(length-prediction_horizon))/prediction_horizon)+1):
-        data_test_temp = data_wo_date[i*prediction_horizon:i*prediction_horizon+(length-prediction_horizon)]
-        data_test_temp = np.array(data_test_temp)
-        data_test_temp = data_test_temp.reshape(1,(length-prediction_horizon),30)
-        y_pred_temp = modelname.predict(data_test_temp).tolist()[0]
-        y_pred = y_pred + y_pred_temp
+## Deprecated function - do not use
+#def compute_plot_pred_multi(data,modelname,length, prediction_horizon):
+#    ''' for many to many model'''
+#    '''compute and plot prediction over test time period and overlay with actual data'''
+#    data_wo_date = data.drop(columns="Date")
+#    len_ = int(0.8*data_wo_date.shape[0])
+#    data_test = data_wo_date[len_:]
+#    y_pred= []
+#    for i in range(int((804-(length-prediction_horizon))/prediction_horizon)+1):
+#        data_test_temp = data_test[i*prediction_horizon:i*prediction_horizon+(length-prediction_horizon)]
+#        data_test_temp = np.array(data_test_temp)
+#        data_test_temp = data_test_temp.reshape(1,(length-prediction_horizon),30)
+#        y_pred_temp = modelname.predict(data_test_temp).tolist()[0]
+#        y_pred = y_pred + y_pred_temp
+#
+#    y_pred_df = pd.DataFrame(y_pred, columns = data_wo_date.columns)
+#    y_pred_df["index"] = y_pred_df.index + 3214+(length-prediction_horizon)
+#    y_pred_df = y_pred_df.set_index("index")
+#
+#    actual = data_test[(length-prediction_horizon):]# take first predicted value from actual data until the end
+#    y_pred_df = y_pred_df[:actual.shape[0]] # only keep where there is actual data
+#
+#    #get the baseline
+#    baseline = get_baseline_predictions(data)[(length-prediction_horizon):]
+#    baseline.reset_index(inplace=True)
+#    baseline["index"] = baseline.index + 3214+(length-prediction_horizon)
+#    baseline = baseline.set_index("index")
+#
+#    fig, ax = plt.subplots(30,1,figsize=(16,100))
+#    for i,AR in enumerate(data_wo_date.columns.tolist()):
+#        ax[i].plot(actual[AR], c= "blue", label='actual')
+#        ax[i].plot(y_pred_df[AR], c="red", label = "forecast")
+#        ax[i].plot(baseline[AR], c="green", linestyle='dashed', label = "baseline")
+#        ax[i].title.set_text(AR)
+#        ax[i].legend(loc="upper left")
+#
+#    error_pred = forecast_accuracy(actual,y_pred_df)
+#    error_baseline = forecast_accuracy(actual,baseline)
+#    print(f"Prediction MSE (computed on test set):{error_pred['mse']}")
+#    print(f"Baseline MSE (computed on test set):{error_baseline['mse']}")
+#
+#    return y_pred_df
 
-    y_pred_df = pd.DataFrame(y_pred, columns = data_wo_date.columns)
-    y_pred_df["index"] = y_pred_df.index + 3214+(length-prediction_horizon)
-    y_pred_df = y_pred_df.set_index("index")
+def compute_pred_test(data,modelname,length, prediction_horizon):
+    ''' compute prediction over the full test period'''
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:]
+    pred = test_data.copy()
+    pred.iloc[:,1:] = None
 
-    actual = data_test[(length-prediction_horizon):]# take first predicted value from actual data until the end
-    y_pred_df = y_pred_df[:actual.shape[0]] # only keep where there is actual data
+    for i in range(0,804-(length-prediction_horizon)-prediction_horizon,prediction_horizon):
+        pred_one = modelname.predict(test_data.iloc[i:i+(length-prediction_horizon),1:]\
+            .to_numpy().reshape(1,(length-prediction_horizon),30))[0]
+        #model.predict()
+        pred.iloc[i+(length-prediction_horizon):i+(length-prediction_horizon)\
+            +prediction_horizon,1:] = pred_one
 
-    #get the baseline
-    baseline = get_baseline_predictions(data)[(length-prediction_horizon):]
-    baseline.reset_index(inplace=True)
-    baseline["index"] = baseline.index + 3214+(length-prediction_horizon)
-    baseline = baseline.set_index("index")
+    return pred
 
+def plot_actual_pred_test(data,modelname, length, prediction_horizon):
+    '''plot pred VS actual VS baseline'''
+    regions = ['Anchieta','Bangu','Barra da Tijuca','Botafogo','Campo Grande','Centro',\
+           'Cidade de Deus','Complexo do Alemao','Copacabana','Guaratiba','Ilha do Governador',\
+           'Inhauma','Iraja','Jacarepagua','Jacarezinho','Lagoa','Madureira','Mare','Meier','Pavuna',\
+           'Portuaria','Ramos','Realengo','Rio Comprido','Rocinha','Santa Cruz','Santa Teresa','Sao Cristovao',\
+           'Tijuca','Vila Isabel']
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:]
+    baseline = get_baseline_predictions(data)
+    y_pred = compute_pred_test(data,modelname,length, prediction_horizon)
     fig, ax = plt.subplots(30,1,figsize=(16,100))
-    for i,AR in enumerate(data_wo_date.columns.tolist()):
-        ax[i].plot(actual[AR], c= "blue", label='actual')
-        ax[i].plot(y_pred_df[AR], c="red", label = "forecast")
-        ax[i].plot(baseline[AR], c="green", linestyle='dashed', label = "baseline")
-        ax[i].title.set_text(AR)
-        ax[i].legend(loc="upper left")
+    for i,AR in enumerate(regions):
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0],test_data.iloc[length-prediction_horizon:,i+1], c= "blue", label='actual')
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0],y_pred.iloc[length-prediction_horizon:,i+1], c="red", label = "forecast")
+            ax[i].plot(test_data.iloc[length-prediction_horizon:,0], baseline.iloc[length-prediction_horizon:,i], c="green", linestyle='dashed', label = "baseline")
+            ax[i].title.set_text(AR)
+            ax[i].legend(loc="upper left")
 
-    error_pred = forecast_accuracy(actual,y_pred_df)
-    error_baseline = forecast_accuracy(actual,baseline)
-    print(f"Prediction MSE (computed on test set):{error_pred['mse']}")
-    print(f"Baseline MSE (computed on test set):{error_baseline['mse']}")
+def error_actual_pred_baseline(data,y_pred,length, prediction_horizon):
+    '''compute mse on test period
+    y_pred can be computed with the function compute_pred_test'''
+    len_ = int(0.8*data.shape[0])
+    test_data = data[len_:][length-prediction_horizon:]
+    test_data = test_data.drop(columns="Date")
+    test_data.reset_index(inplace=True)
 
-    return y_pred_df
+    baseline_test = get_baseline_predictions(data)[length-prediction_horizon:]
+    baseline_test.reset_index(inplace=True)
+    diff_baseline = abs(test_data - baseline_test)
+    diff_baseline_2 = diff_baseline#**2
+    error_baseline = diff_baseline_2.mean()
+    error_baseline = pd.DataFrame(error_baseline)
+
+    y_pred_test =y_pred[length-prediction_horizon:]
+    y_pred_test = y_pred_test.drop(columns="Date")
+    y_pred_test.reset_index(inplace=True)
+    diff_y_pred = abs(test_data - y_pred_test)
+    diff_y_pred_2 = diff_y_pred#**2
+    error_y_pred = diff_y_pred_2.mean()
+    error_y_pred = pd.DataFrame(error_y_pred)
+
+    error=pd.DataFrame()
+    error["mae_baseline"] = error_baseline
+    error["mae_prediction"] = error_y_pred
+    error = error[1:]
+    error_mean = pd.DataFrame(error.mean()).T
+    error_tot = pd.concat([error, error_mean])
+    error_tot.index.values[-1] = "Rio Mean"
+
+    return error_tot

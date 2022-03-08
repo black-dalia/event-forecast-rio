@@ -15,6 +15,14 @@ with st.echo():
     # from streamlit_folium import folium_static
     # import folium
 
+    st.markdown("""
+    # Crime prediction for Rio de Janeiro
+
+    ##### Below you can find predicted number of crimes for January 2020 for administrative regions of Rio de Janeiro.
+    ##### Click on the desired region and see predicted values as well as actual values from 2018 - 2019.
+
+""")
+
     location = df_final['lat_centroid'].mean(), df_final['lon_centroid'].mean()
     m = folium.Map(location=location,zoom_start=10)
 

@@ -4,24 +4,26 @@ from streamlit_folium import folium_static
 import geopandas as gpd
 import folium
 import streamlit.components.v1 as components
-import branca
+import requests
+# from multipage import MultiPage
+
+
+# app = MultiPage()
 
 df_final = pd.read_csv("map_df.csv")
 
-"# streamlit-folium"
+st.markdown("""
+            Crime prediction for Rio de Janeiro
 
-with st.echo():
-    # import streamlit as st
-    # from streamlit_folium import folium_static
-    # import folium
+            ###### Below you can find predicted number of crimes for January 2020 for administrative regions of Rio de Janeiro.
+            ###### Click on the desired region and see predicted values as well as actual values from 2018 - 2019.
 
-    st.markdown("""
-    # Crime prediction for Rio de Janeiro
+    """)
 
-    ##### Below you can find predicted number of crimes for January 2020 for administrative regions of Rio de Janeiro.
-    ##### Click on the desired region and see predicted values as well as actual values from 2018 - 2019.
-
-""")
+# Create a page dropdown
+page = st.selectbox("Navigation", ["Get crime predictions", "Learn more about our project", "Get news from Polícia Civil RJ"])
+if page == "Get crime predictions":
+    # Display details of page 1
 
     location = df_final['lat_centroid'].mean(), df_final['lon_centroid'].mean()
     m = folium.Map(location=location,zoom_start=10)
@@ -96,7 +98,60 @@ with st.echo():
     source_code = HtmlFile.read()
     components.html(source_code, width=800, height=800)
 
-
-
     # call to render Folium map in Streamlit
-    folium_static(m)
+# folium_static(m)
+
+
+elif page == "Learn more about our project":
+    # Display details of page 2
+
+    st.markdown("""
+            Lorem ipsum sit dolor...
+
+    """)
+
+elif page == "Get news from Polícia Civil RJ":
+    # Display details of page 3
+
+    st.markdown("""
+            Crime prediction for Rio de Janeiro
+
+            ###### Below you can find predicted number of crimes for January 2020 for administrative regions of Rio de Janeiro.
+            ###### Click on the desired region and see predicted values as well as actual values from 2018 - 2019.
+
+    """)
+
+    class Tweet(object):
+        def __init__(self, s, embed_str=False):
+            if not embed_str:
+                # Use Twitter's oEmbed API
+                # https://dev.twitter.com/web/embedded-tweets
+                api = "https://publish.twitter.com/oembed?url={}".format(s)
+                response = requests.get(api)
+                self.text = response.json()["html"]
+            else:
+                self.text = s
+
+        def _repr_html_(self):
+            return self.text
+
+        def component(self):
+            return components.html(self.text, height=600)
+
+
+    t = Tweet("https://twitter.com/pcerj?lang=en").component()
+
+
+    # def theTweet(tweet_url):
+    #     api = "https://publish.twitter.com/oembed?url".format(tweet_url)
+    #     response = requests.get(api)
+    #     res = response.json()
+    #     return res
+
+    # res = theTweet("https://twitter.com/PCERJ?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor")
+    # st.write(res)
+
+# with st.echo():
+#     # import streamlit as st
+#     # from streamlit_folium import folium_static
+#     # import folium
